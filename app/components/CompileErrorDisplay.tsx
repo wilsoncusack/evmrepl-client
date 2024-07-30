@@ -1,4 +1,4 @@
-import type { SolcError } from "../page";
+import type { SolcError } from "../hooks/useSolidityCompiler";
 
 interface ErrorDisplayProps {
   errors: SolcError[];
