@@ -97,18 +97,17 @@ export const useFunctionExecutor = (
 };
 
 const parseFunctionCalls = (functionCalls: string[]) => {
-  return functionCalls
-    .map((line) => {
-      const call = line.match(/(\w+)\((.*)\)/);
-      if (call) {
-        const name = call[1];
-        const args = call[2]
-          .split(",")
-          .map((arg) => arg.trim())
-          .filter((arg) => arg !== "");
-        return { name, args };
-      }
-      return null;
-    })
-    .filter(Boolean);
+  const calls: { name: string; args: string[] }[] = [];
+  for (const line of functionCalls) {
+    const call = line.match(/(\w+)\((.*)\)/);
+    if (call) {
+      const name = call[1];
+      const args = call[2]
+        .split(",")
+        .map((arg) => arg.trim())
+        .filter((arg) => arg !== "");
+      calls.push({ name, args });
+    }
+  }
+  return calls;
 };
