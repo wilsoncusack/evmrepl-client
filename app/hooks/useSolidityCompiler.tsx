@@ -32,19 +32,6 @@ export const useSolidityCompiler = (solidityCode: string) => {
         setCompilationErrors(response.data.errors);
       } catch (error) {
         console.error("Compilation error:", error);
-        if (axios.isAxiosError(error)) {
-          const axiosError = error as AxiosError<{ message: string }>;
-          // if (axiosError.response) {
-          //   setCompilationErrors([
-          //     {
-          //       errorType: "Error",
-          //       message:
-          //         axiosError.response.data.message || "Unknown error occurred",
-          //       details: {},
-          //     },
-          //   ]);
-          // }
-        }
       }
     };
 
