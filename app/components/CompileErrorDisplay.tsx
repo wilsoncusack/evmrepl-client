@@ -1,7 +1,7 @@
-import type { SolcError } from "../hooks/useSolidityCompiler";
+import { CompilationResult } from "../types";
 
 interface ErrorDisplayProps {
-  errors: SolcError[];
+  errors: CompilationResult["errors"];
 }
 
 const CompileErrorDisplay: React.FC<ErrorDisplayProps> = ({ errors }) => {
@@ -15,18 +15,12 @@ const CompileErrorDisplay: React.FC<ErrorDisplayProps> = ({ errors }) => {
       {errors.map((error, index) => (
         <div
           key={index}
-          className={`mb-2 p-2 rounded ${error.errorType === "Error" ? "bg-red-200" : "bg-yellow-200"}`}
+          className={`mb-2 p-2 rounded ${error.severity === "error" ? "bg-red-200" : "bg-yellow-200"}`}
         >
           <p className="font-semibold">
-            {error.errorType}: {error.message}
+            {error.severity}: {error.message}
           </p>
-          {error.details.line && <p>Line: {error.details.line}</p>}
-          {error.details.column && <p>Column: {error.details.column}</p>}
-          {error.details.codeSnippet && (
-            <pre className="mt-2 p-2 bg-gray-100 rounded">
-              <code>{error.details.codeSnippet}</code>
-            </pre>
-          )}
+          {error.formattedMessage && <p>{error.formattedMessage}</p>}
         </div>
       ))}
     </div>
