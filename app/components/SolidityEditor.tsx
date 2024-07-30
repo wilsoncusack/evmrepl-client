@@ -1,6 +1,7 @@
-import React, { useRef, useEffect, useState, useMemo } from "react";
-import Editor, { OnMount } from "@monaco-editor/react";
-import type { SolcError } from "../page";
+import type React from "react";
+import { useRef, useMemo } from "react";
+import Editor, { type OnMount } from "@monaco-editor/react";
+import type { SolcError } from "../hooks/useSolidityCompiler";
 import CompileErrorDisplay from "./CompileErrorDisplay";
 
 interface SolidityEditorProps {
