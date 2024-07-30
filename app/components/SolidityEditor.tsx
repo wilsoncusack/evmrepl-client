@@ -1,13 +1,13 @@
 import type React from "react";
 import { useRef, useMemo } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
-import type { SolcError } from "../hooks/useSolidityCompiler";
 import CompileErrorDisplay from "./CompileErrorDisplay";
+import { CompilationResult } from "../types";
 
 interface SolidityEditorProps {
   solidityCode: string;
   setSolidityCode: (code: string) => void;
-  errors: SolcError[];
+  errors: CompilationResult["errors"];
 }
 
 const SolidityEditor: React.FC<SolidityEditorProps> = ({
@@ -19,7 +19,7 @@ const SolidityEditor: React.FC<SolidityEditorProps> = ({
 
   const relevantErrors = useMemo(() => {
     if (!errors) return [];
-    return errors.filter((e) => e.errorType !== "Warning");
+    return errors.filter((e) => e.severity !== "warning");
   }, [errors]);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
