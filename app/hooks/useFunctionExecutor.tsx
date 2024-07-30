@@ -23,15 +23,15 @@ export type ExecutionResponse = {
 };
 
 export const useFunctionExecutor = (
-  bytecode: string,
-  abi: Abi,
+  bytecode: string | null,
+  abi: Abi | null,
   functionCalls: string[],
 ) => {
   const [result, setResult] = useState<Array<FunctionCallResult>>([]);
 
   const handleFunctionCalls = useCallback(
     async (parsedCalls: { name: string; args: string[] }[]) => {
-      if (!abi.length || !bytecode) return;
+      if (!abi || !abi.length || !bytecode) return;
 
       const calls: { calldata: Hex; value: string; caller: Address }[] =
         parsedCalls.map((call) => ({
@@ -88,7 +88,7 @@ export const useFunctionExecutor = (
 
   useEffect(() => {
     const calls = parseFunctionCalls(functionCalls);
-    if (bytecode && calls.length > 0 && abi.length > 0) {
+    if (bytecode && calls.length > 0 && abi && abi.length > 0) {
       debouncedHandleFunctionCalls(calls);
     }
   }, [bytecode, functionCalls, abi, debouncedHandleFunctionCalls]);

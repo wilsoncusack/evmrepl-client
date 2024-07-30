@@ -1,4 +1,5 @@
-import type { DecodeEventLogReturnType } from "viem";
+import React from "react";
+import type { Abi, DecodeEventLogReturnType } from "viem";
 import FunctionCallItem from "./FunctionCallItem";
 
 export type FunctionCallResult = {
@@ -32,6 +33,7 @@ export type FunctionCallResult = {
 };
 
 interface FunctionCallsPanelProps {
+  abi: Abi | null;
   functionCalls: string[];
   result: Array<FunctionCallResult>;
   addFunctionCall: () => void;
@@ -42,11 +44,20 @@ interface FunctionCallsPanelProps {
 }
 
 const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
+  abi,
   functionCalls,
   result,
   addFunctionCall,
   handleFunctionCallsChange,
 }) => {
+  if (!abi) {
+    return (
+      <div className="w-full md:w-1/2 p-4">
+        Please select a contract to make function calls.
+      </div>
+    );
+  }
+
   return (
     <div className="w-full md:w-1/2 p-4 overflow-y-auto">
       <div className="space-y-4">
