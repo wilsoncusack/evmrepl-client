@@ -2,6 +2,8 @@ import { createContext } from "react";
 import type {
   CompilationResult,
   FileFunctionCalls,
+  FileId,
+  FunctionCallResult,
   SolidityFile,
 } from "../types";
 
@@ -12,8 +14,10 @@ interface AppContextType {
   setFilesFunctionCalls: React.Dispatch<
     React.SetStateAction<FileFunctionCalls>
   >;
-  currentFile: SolidityFile;
-  setCurrentFile: React.Dispatch<React.SetStateAction<SolidityFile>>;
+  currentFile?: SolidityFile;
+  currentFileCompilationResult?: CompilationResult["contracts"][0][0][0]["contract"];
+  currentFileFunctionCallResults?: FunctionCallResult[];
+  setCurrentFileId: React.Dispatch<React.SetStateAction<FileId>>;
   compilationResult?: CompilationResult;
   isCompiling: boolean;
   setIsCompiling: React.Dispatch<React.SetStateAction<boolean>>;

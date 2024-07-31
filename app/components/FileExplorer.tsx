@@ -4,22 +4,21 @@
 import type React from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import type { SolidityFile } from "../types";
-import { randomUUID } from "crypto";
 
 const FileExplorer: React.FC = () => {
-  const { files, currentFile, setCurrentFile, setFiles } = useAppContext();
+  const { files, currentFile, setCurrentFileId, setFiles } = useAppContext();
 
   const onFileSelect = (fileId: string) => {
     const selectedFile = files.find((file) => file.id === fileId);
     if (selectedFile) {
-      setCurrentFile(selectedFile);
+      setCurrentFileId(selectedFile.id);
     }
   };
 
   const onAddFile = () => {
     const newFileName = `NewFile${files.length + 1}.sol`;
     const newFile: SolidityFile = {
-      id: randomUUID(),
+      id: crypto.randomUUID(),
       name: newFileName,
       content: "// Your Solidity code here",
     };
@@ -32,7 +31,7 @@ const FileExplorer: React.FC = () => {
       <ul>
         {files.map((file) => (
           <li
-            key={file.id}
+            key={currentFile.id}
             className={`cursor-pointer p-1 ${
               file.id === currentFile.id ? "bg-gray-200" : ""
             }`}

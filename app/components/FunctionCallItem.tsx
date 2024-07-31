@@ -1,38 +1,51 @@
-import { DecodeEventLogReturnType } from "viem";
-import type { FunctionCallResult } from "./FunctionCallsPanel";
+// components/FunctionCallItem.tsx
+"use client";
+
+import React from "react";
+import { useAppContext } from "../hooks/useAppContext";
 import ResultDisplay from "./ResultDisplay";
+import { FunctionCall, FunctionCallResult } from "../types";
 
 interface FunctionCallItemProps {
-  call: string;
+  call: FunctionCall
   index: number;
-  result?: FunctionCallResult;
-  handleFunctionCallsChange: (
-    e: React.ChangeEvent<HTMLTextAreaElement> | null,
-    index: number,
-  ) => void;
+  result?: FunctionCallResult
+  handleFunctionCallsChange: (newCall: string, index: number) => void;
 }
 
 const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
   call,
   index,
-  result,
   handleFunctionCallsChange,
+  result
 }) => {
+  const { setFilesFunctionCalls, currentFile } = useAppContext();
+
+  const handleDelete = () => {
+    if (!currentFile) return;
+
+    setFilesFunctionCalls((prev) => {
+      const newCalls = [...(prev[currentFile.id] || [])];
+      newCalls.splice(index, 1);
+      return { ...prev, [currentFile.id]: newCalls };
+    });
+  };
+
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="flex items-center p-2 bg-gray-50">
         <div className="flex-grow relative">
           <textarea
             className="w-full p-2 bg-white text-gray-800 resize-none focus:outline-none font-mono border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-            value={call}
-            onChange={(e) => handleFunctionCallsChange(e, index)}
+            value={call.name}
+            onChange={(e) => handleFunctionCallsChange(e.target.value, index)}
             rows={1}
             placeholder="Enter function call (e.g., set(1))"
           />
         </div>
         <button
           className="ml-2 p-1 text-red-500 hover:bg-red-100 rounded"
-          onClick={() => handleFunctionCallsChange(null, index)}
+          onClick={handleDelete}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

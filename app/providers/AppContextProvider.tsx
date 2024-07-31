@@ -6,6 +6,7 @@ import type {
   CompilationResult,
   ExecutionResponse,
   FileFunctionCalls,
+  FileId,
   FunctionCall,
   SolidityFile,
 } from "../types";
@@ -20,6 +21,7 @@ import {
 } from "viem";
 import axios from "axios";
 import { useDebounce } from "../hooks/useDebounce";
+import { extractFileName, replacer } from "../utils";
 
 export const AppProvider: React.FC<{
   initialFiles: SolidityFile[];
@@ -28,13 +30,31 @@ export const AppProvider: React.FC<{
 }> = ({ initialFiles, initialFunctionCalls, children }) => {
   const [files, setFiles] = useState<SolidityFile[]>(initialFiles);
   // TODO consider if there can be no current file
-  const [currentFile, setCurrentFile] = useState<SolidityFile>(initialFiles[0]);
+  const [currentFileId, setCurrentFileId] = useState<FileId>(initialFiles[0].id);
   const [filesFunctionCalls, setFilesFunctionCalls] =
     useState<FileFunctionCalls>(initialFunctionCalls);
   const [compilationResult, setCompilationResult] = useState<
     CompilationResult | undefined
   >(undefined);
   const [isCompiling, setIsCompiling] = useState(false);
+  const [currentFileFunctionCallResults, setCurrentFileFunctionCallResults] = useState<FunctionCallResult[] | undefined>(undefined);
+
+  const currentFile = useMemo(() => {
+    return files.find((f) => f.id === currentFileId);
+  }, [currentFileId, files]);
+
+  const currentFileCompilationResult = useMemo(() => {
+    if (!compilationResult || !currentFile) return;
+
+    const compiledFiles = Object.keys(compilationResult.contracts);
+    const k = compiledFiles.find((file) => extractFileName(file) === currentFile.name);
+    if (!k) {
+      console.error("Could not find compiled result for current file");
+      return
+    }
+
+    return Object.values(compilationResult.contracts[k])[0][0].contract;
+  }, [currentFile, compilationResult]);
 
   useEffect(() => {
     const compileCode = async () => {
@@ -74,34 +94,41 @@ export const AppProvider: React.FC<{
   }, [files]);
 
   const refreshFunctionCallResult = useCallback(async () => {
-    if (!currentFile.compilationResult) return;
-
+    if (!currentFile || !currentFileCompilationResult) return;
+    
     const currentFileFunctionCalls = filesFunctionCalls[currentFile.id];
     if (!currentFileFunctionCalls) {
       console.error("No function calls found for current file");
       return;
     }
 
+    console.log(currentFileFunctionCalls);
+
     if (currentFileFunctionCalls.length === 0) {
       return;
     }
 
     const calls = currentFileFunctionCalls;
-    const abi = currentFile.compilationResult.abi;
-    const bytecode = currentFile.compilationResult.evm.bytecode.object;
+    const abi = currentFileCompilationResult.abi;
+    const bytecode = currentFileCompilationResult.evm.bytecode.object;
 
-    const encodedCalls: { call: Hex; value: bigint; caller: Address }[] = [];
+    const encodedCalls: { calldata: Hex; value: string; caller: Address }[] = [];
     for (const call of calls) {
+      if (call.name) {
+      console.log(call)
+      console.log('call name', call.name)
       const data = encodeFunctionData({
         abi,
         functionName: call.name,
         args: call.args,
       });
+      console.log('data', data)
       encodedCalls.push({
-        call: data,
-        value: call.value || BigInt(0),
+        calldata: data,
+        value: "0",
         caller: call.caller || zeroAddress,
       });
+    }
     }
 
     try {
@@ -109,7 +136,7 @@ export const AppProvider: React.FC<{
         `${process.env.NEXT_PUBLIC_SERVER}/execute_calldatas_fork`,
         {
           bytecode,
-          encodedCalls,
+          calls: encodedCalls,
         },
       );
       const results = response.data;
@@ -135,19 +162,11 @@ export const AppProvider: React.FC<{
         };
       });
 
-      const newFunctionCalls: FunctionCall[] = calls.map((f, i) => {
-        return { ...f, result: output[i] };
-      });
-      setFilesFunctionCalls((prev) => {
-        return {
-          ...prev,
-          [currentFile.id]: newFunctionCalls,
-        };
-      });
+      setCurrentFileFunctionCallResults(output);
     } catch (error) {
       console.error("Execution error:", error);
     }
-  }, [currentFile, filesFunctionCalls]);
+  }, [currentFile, filesFunctionCalls, currentFileCompilationResult]);
 
   const debouncedRefreshFunctionCallResult = useDebounce(
     refreshFunctionCallResult,
@@ -170,10 +189,12 @@ export const AppProvider: React.FC<{
     filesFunctionCalls,
     setFilesFunctionCalls,
     currentFile,
-    setCurrentFile,
+    setCurrentFileId,
     compilationResult,
     isCompiling,
     setIsCompiling,
+    currentFileCompilationResult,
+    currentFileFunctionCallResults
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

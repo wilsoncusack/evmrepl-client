@@ -1,32 +1,42 @@
-import React from "react";
-import type { Abi, DecodeEventLogReturnType } from "viem";
+// components/FunctionCallsPanel.tsx
+"use client";
+
+import React, { useMemo } from "react";
+import { useAppContext } from "../hooks/useAppContext";
 import FunctionCallItem from "./FunctionCallItem";
 
-interface FunctionCallsPanelProps {
-  abi: Abi | null;
-  functionCalls: string[];
-  result: Array<FunctionCallResult>;
-  addFunctionCall: () => void;
-  handleFunctionCallsChange: (
-    e: React.ChangeEvent<HTMLTextAreaElement> | null,
-    index: number,
-  ) => void;
-}
+const FunctionCallsPanel: React.FC = () => {
+  const {
+    currentFile,
+    filesFunctionCalls,
+    setFilesFunctionCalls,
+    currentFileFunctionCallResults,
+  } = useAppContext();
 
-const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
-  abi,
-  functionCalls,
-  result,
-  addFunctionCall,
-  handleFunctionCallsChange,
-}) => {
-  if (!abi) {
-    return (
-      <div className="w-full md:w-1/2 p-4">
-        Please select a contract to make function calls.
-      </div>
-    );
-  }
+  const functionCalls = useMemo(() => {
+    if (!currentFile) return [];
+    return filesFunctionCalls[currentFile.id] || [];
+  }, [currentFile, filesFunctionCalls]);
+
+  const addFunctionCall = () => {
+    if (!currentFile) return;
+    setFilesFunctionCalls((prev) => ({
+      ...prev,
+      [currentFile.id]: [
+        ...(prev[currentFile.id] || []),
+        { name: "", args: [] },
+      ],
+    }));
+  };
+
+  const handleFunctionCallsChange = (newCall: string, index: number) => {
+    if (!currentFile) return;
+    setFilesFunctionCalls((prev) => {
+      const newCalls = [...(prev[currentFile.id] || [])];
+      newCalls[index] = { ...newCalls[index], name: newCall };
+      return { ...prev, [currentFile.id]: newCalls };
+    });
+  };
 
   return (
     <div className="w-full md:w-1/2 p-4 overflow-y-auto">
@@ -47,7 +57,7 @@ const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
             key={index}
             call={call}
             index={index}
-            result={result[index]}
+            result={currentFileFunctionCallResults ? currentFileFunctionCallResults[index] : undefined}
             handleFunctionCallsChange={handleFunctionCallsChange}
           />
         ))}

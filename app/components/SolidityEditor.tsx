@@ -53,6 +53,7 @@ const SolidityEditor: React.FC = () => {
   }, [currentFile]);
 
   const handleEditorChange = (value: string | undefined) => {
+    if (!currentFile) return;
     setFiles(
       files.map((file) =>
         file.id === currentFile.id ? { ...file, content: value || "" } : file,
@@ -67,25 +68,27 @@ const SolidityEditor: React.FC = () => {
       )}
       <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
         <div className="relative flex h-[calc(100vh-10rem)] p-4">
-          <Editor
-            height="100%"
-            defaultLanguage="sol"
-            path={currentFile.name}
-            value={currentFile.content}
-            onChange={handleEditorChange}
-            onMount={handleEditorDidMount}
-            options={{
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              fontSize: 14,
-              lineNumbers: "on",
-              glyphMargin: true,
-              folding: true,
-              lineNumbersMinChars: 0,
-              overviewRulerBorder: false,
-              language: "sol",
-            }}
-          />
+          {currentFile && (
+            <Editor
+              height="100%"
+              defaultLanguage="sol"
+              path={currentFile.name}
+              value={currentFile.content}
+              onChange={handleEditorChange}
+              onMount={handleEditorDidMount}
+              options={{
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 14,
+                lineNumbers: "on",
+                glyphMargin: true,
+                folding: true,
+                lineNumbersMinChars: 0,
+                overviewRulerBorder: false,
+                language: "sol",
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

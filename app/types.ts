@@ -91,7 +91,7 @@ export type FunctionCallResult = {
   };
 };
 
-type FileId = string;
+export type FileId = string;
 
 export interface FileFunctionCalls {
   [id: FileId]: FunctionCall[];
@@ -103,8 +103,8 @@ export interface FunctionCall {
   args: any[];
   value?: bigint;
   caller?: Address;
+  // TODO: probably cut encoded caldata
   encodedCalldata?: Hex;
-  result?: FunctionCallResult;
   // consider having something for like parse errors. But maybe these never make it
   error?: string;
 }
@@ -113,7 +113,6 @@ export interface SolidityFile {
   id: FileId;
   name: string;
   content: string;
-  compilationResult?: CompilationResult["contracts"][0][0][0]["contract"];
 }
 
 export type ExecutionResponse = {
