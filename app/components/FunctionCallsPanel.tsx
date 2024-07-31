@@ -2,36 +2,6 @@ import React from "react";
 import type { Abi, DecodeEventLogReturnType } from "viem";
 import FunctionCallItem from "./FunctionCallItem";
 
-export type FunctionCallResult = {
-  call: string;
-  gasUsed: string;
-  response: string | undefined;
-  logs: DecodeEventLogReturnType[];
-  traces: {
-    arena: Array<{
-      parent: null | number;
-      children: number[];
-      idx: number;
-      trace: {
-        depth: number;
-        success: boolean;
-        caller: string;
-        address: string;
-        kind: string;
-        value: string;
-        data: string;
-        output: string;
-        gas_used: number;
-        gas_limit: number;
-        status: string;
-        steps: any[]; // You might want to define a more specific type for steps
-      };
-      logs: any[]; // Define a more specific type if needed
-      ordering: number[];
-    }>;
-  };
-};
-
 interface FunctionCallsPanelProps {
   abi: Abi | null;
   functionCalls: string[];

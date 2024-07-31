@@ -13,15 +13,6 @@ import {
 import { useDebounce } from "./useDebounce";
 import type { FunctionCallResult } from "../components/FunctionCallsPanel";
 
-export type ExecutionResponse = {
-  exitReason: string;
-  reverted: boolean;
-  result: Hex;
-  gasUsed: string;
-  logs: Log[];
-  traces: FunctionCallResult["traces"];
-};
-
 export const useFunctionExecutor = (
   bytecode: string | null,
   abi: Abi | null,
