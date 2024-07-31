@@ -1,28 +1,19 @@
 // components/SolidityEditor.tsx
-import type React from "react";
-import { useRef, useMemo, useEffect } from "react";
+"use client";
+
+import React, { useRef, useMemo, useEffect } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import CompileErrorDisplay from "./CompileErrorDisplay";
-import type { CompilationResult, File } from "../types";
+import { useAppContext } from "../hooks/useAppContext";
 
-interface SolidityEditorProps {
-  files: File[];
-  currentFile: string;
-  setFiles: (files: File[]) => void;
-  errors: CompilationResult["errors"];
-}
-
-const SolidityEditor: React.FC<SolidityEditorProps> = ({
-  files,
-  currentFile,
-  setFiles,
-  errors,
-}) => {
+const SolidityEditor: React.FC = () => {
+  const { files, currentFile, setFiles, compilationResult } = useAppContext();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
 
+  const errors = compilationResult?.errors || [];
+
   const relevantErrors = useMemo(() => {
-    if (!errors) return [];
     return errors.filter((e) => e.severity !== "warning");
   }, [errors]);
 
@@ -43,7 +34,7 @@ const SolidityEditor: React.FC<SolidityEditorProps> = ({
 
     // Set the current model
     const currentModel = monaco.editor.getModel(
-      monaco.Uri.parse(`file:///${currentFile}`),
+      monaco.Uri.parse(`file:///${currentFile.name}`),
     );
     if (currentModel) {
       editor.setModel(currentModel);
@@ -53,7 +44,7 @@ const SolidityEditor: React.FC<SolidityEditorProps> = ({
   useEffect(() => {
     if (editorRef.current && monacoRef.current) {
       const currentModel = monacoRef.current.editor.getModel(
-        monacoRef.current.Uri.parse(`file:///${currentFile}`),
+        monacoRef.current.Uri.parse(`file:///${currentFile.name}`),
       );
       if (currentModel) {
         editorRef.current.setModel(currentModel);
@@ -64,7 +55,7 @@ const SolidityEditor: React.FC<SolidityEditorProps> = ({
   const handleEditorChange = (value: string | undefined) => {
     setFiles(
       files.map((file) =>
-        file.name === currentFile ? { ...file, content: value || "" } : file,
+        file.id === currentFile.id ? { ...file, content: value || "" } : file,
       ),
     );
   };
@@ -79,8 +70,8 @@ const SolidityEditor: React.FC<SolidityEditorProps> = ({
           <Editor
             height="100%"
             defaultLanguage="sol"
-            path={currentFile}
-            value={files.find((f) => f.name === currentFile)?.content}
+            path={currentFile.name}
+            value={currentFile.content}
             onChange={handleEditorChange}
             onMount={handleEditorDidMount}
             options={{

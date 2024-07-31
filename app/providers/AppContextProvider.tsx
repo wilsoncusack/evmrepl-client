@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { AppContext } from "../contexts/appContext";
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AppContext } from "../contexts/AppContext";
 import type {
   CompilationResult,
   ExecutionResponse,
@@ -17,27 +19,7 @@ import {
   zeroAddress,
 } from "viem";
 import axios from "axios";
-
-const simpleStorageSolidityCode = `pragma solidity 0.8.26;
-
-contract SimpleStorage {
-    uint256 public storedData;
-    event StoredDataUpdated(uint);
-
-    function set(uint256 x) public {
-        storedData = x;
-        emit StoredDataUpdated(x);
-    }
-
-    function get() public view returns (uint256) {
-        return storedData;
-    }
-
-    function getBlockNumber() public view returns (uint256) {
-      return block.number;
-  }
-}
-`;
+import { useDebounce } from "../hooks/useDebounce";
 
 export const AppProvider: React.FC<{
   initialFiles: SolidityFile[];
@@ -92,8 +74,6 @@ export const AppProvider: React.FC<{
   }, [files]);
 
   const refreshFunctionCallResult = useCallback(async () => {
-    // Do some debounce
-
     if (!currentFile.compilationResult) return;
 
     const currentFileFunctionCalls = filesFunctionCalls[currentFile.id];
@@ -169,17 +149,20 @@ export const AppProvider: React.FC<{
     }
   }, [currentFile, filesFunctionCalls]);
 
-  useEffect(() => {
-    refreshFunctionCallResult();
-  }, [compilationResult, refreshFunctionCallResult]);
+  const debouncedRefreshFunctionCallResult = useDebounce(
+    refreshFunctionCallResult,
+    300,
+  );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: want to update when any of these change
   useEffect(() => {
-    refreshFunctionCallResult();
-  }, [currentFile, refreshFunctionCallResult]);
-
-  useEffect(() => {
-    refreshFunctionCallResult();
-  }, [filesFunctionCalls, refreshFunctionCallResult]);
+    debouncedRefreshFunctionCallResult();
+  }, [
+    compilationResult,
+    currentFile,
+    filesFunctionCalls,
+    debouncedRefreshFunctionCallResult,
+  ]);
 
   const value = {
     files,
