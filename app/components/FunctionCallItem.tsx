@@ -1,38 +1,121 @@
-import { DecodeEventLogReturnType } from "viem";
-import type { FunctionCallResult } from "./FunctionCallsPanel";
+// components/FunctionCallItem.tsx
+"use client";
+
+import type React from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useAppContext } from "../hooks/useAppContext";
 import ResultDisplay from "./ResultDisplay";
+import type { FunctionCall, FunctionCallResult } from "../types";
+import { encodeFunctionData } from "viem";
 
 interface FunctionCallItemProps {
-  call: string;
+  call: FunctionCall;
   index: number;
   result?: FunctionCallResult;
-  handleFunctionCallsChange: (
-    e: React.ChangeEvent<HTMLTextAreaElement> | null,
-    index: number,
-  ) => void;
 }
 
 const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
   call,
   index,
   result,
-  handleFunctionCallsChange,
 }) => {
+  const {
+    setFilesFunctionCalls,
+    currentFile,
+    currentFileCompilationResult,
+    clearCurrentFileFunctionCallResults,
+  } = useAppContext();
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only want this to run when compilation changes
+  useEffect(() => {
+    handleFunctionCallsChange(call.rawInput, index);
+  }, [currentFileCompilationResult]);
+
+  const handleFunctionCallsChange = useCallback(
+    (newCall: string, index: number) => {
+      if (!currentFile || !currentFileCompilationResult) return;
+      setError(undefined);
+      if (!newCall || newCall === "") return;
+      try {
+        const { name, args } = parseFunctionCall(newCall);
+        const data = encodeFunctionData({
+          abi: currentFileCompilationResult.abi,
+          functionName: name,
+          args: args,
+        });
+
+        setFilesFunctionCalls((prev) => {
+          const newCalls = [...(prev[currentFile.id] || [])];
+          newCalls[index] = {
+            ...newCalls[index],
+            args,
+            name,
+            rawInput: newCall,
+            encodedCalldata: data,
+          };
+          return { ...prev, [currentFile.id]: newCalls };
+        });
+      } catch (e) {
+        setError(String(e));
+        setFilesFunctionCalls((prev) => {
+          const newCalls: FunctionCall[] = [...(prev[currentFile.id] || [])];
+          newCalls[index] = { ...newCalls[index], rawInput: newCall };
+          return { ...prev, [currentFile.id]: newCalls };
+        });
+      }
+    },
+    [currentFile, currentFileCompilationResult, setFilesFunctionCalls],
+  );
+
+  const parseFunctionCall = (call: string): Partial<FunctionCall> => {
+    // Regular expression to match function name and arguments
+    const match = call.match(/^(\w+)\((.*)\)$/);
+
+    if (!match) {
+      throw Error("Invalid function call format");
+    }
+
+    const [, name, argsString] = match;
+
+    // Parse arguments
+    let args: any[] = [];
+    if (argsString.trim() !== "") {
+      args = argsString.split(",").map((arg) => {
+        return arg.trim();
+      });
+    }
+
+    return { name, args };
+  };
+
+  const handleDelete = () => {
+    if (!currentFile) return;
+
+    setFilesFunctionCalls((prev) => {
+      const newCalls = [...(prev[currentFile.id] || [])];
+      newCalls.splice(index, 1);
+      return { ...prev, [currentFile.id]: newCalls };
+    });
+    clearCurrentFileFunctionCallResults();
+  };
+
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="flex items-center p-2 bg-gray-50">
         <div className="flex-grow relative">
           <textarea
             className="w-full p-2 bg-white text-gray-800 resize-none focus:outline-none font-mono border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-            value={call}
-            onChange={(e) => handleFunctionCallsChange(e, index)}
+            value={call.rawInput}
+            onChange={(e) => handleFunctionCallsChange(e.target.value, index)}
             rows={1}
             placeholder="Enter function call (e.g., set(1))"
           />
         </div>
         <button
+          type="button"
           className="ml-2 p-1 text-red-500 hover:bg-red-100 rounded"
-          onClick={() => handleFunctionCallsChange(null, index)}
+          onClick={handleDelete}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -48,6 +131,7 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
           </svg>
         </button>
       </div>
+      {error && <div className="p-2 text-red-500 text-sm">{error}</div>}
       {result && <ResultDisplay result={result} />}
     </div>
   );

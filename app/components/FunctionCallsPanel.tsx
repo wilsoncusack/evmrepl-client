@@ -1,55 +1,35 @@
-import type { DecodeEventLogReturnType } from "viem";
+// components/FunctionCallsPanel.tsx
+"use client";
+
+import React, { useMemo } from "react";
+import { useAppContext } from "../hooks/useAppContext";
 import FunctionCallItem from "./FunctionCallItem";
 
-export type FunctionCallResult = {
-  call: string;
-  gasUsed: string;
-  response: string | undefined;
-  logs: DecodeEventLogReturnType[];
-  traces: {
-    arena: Array<{
-      parent: null | number;
-      children: number[];
-      idx: number;
-      trace: {
-        depth: number;
-        success: boolean;
-        caller: string;
-        address: string;
-        kind: string;
-        value: string;
-        data: string;
-        output: string;
-        gas_used: number;
-        gas_limit: number;
-        status: string;
-        steps: any[]; // You might want to define a more specific type for steps
-      };
-      logs: any[]; // Define a more specific type if needed
-      ordering: number[];
-    }>;
+const FunctionCallsPanel: React.FC = () => {
+  const {
+    currentFile,
+    filesFunctionCalls,
+    setFilesFunctionCalls,
+    currentFileFunctionCallResults,
+  } = useAppContext();
+
+  const functionCalls = useMemo(() => {
+    if (!currentFile) return [];
+    return filesFunctionCalls[currentFile.id] || [];
+  }, [currentFile, filesFunctionCalls]);
+
+  const addFunctionCall = () => {
+    if (!currentFile) return;
+    setFilesFunctionCalls((prev) => ({
+      ...prev,
+      [currentFile.id]: [...(prev[currentFile.id] || []), { rawInput: "" }],
+    }));
   };
-};
 
-interface FunctionCallsPanelProps {
-  functionCalls: string[];
-  result: Array<FunctionCallResult>;
-  addFunctionCall: () => void;
-  handleFunctionCallsChange: (
-    e: React.ChangeEvent<HTMLTextAreaElement> | null,
-    index: number,
-  ) => void;
-}
-
-const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
-  functionCalls,
-  result,
-  addFunctionCall,
-  handleFunctionCallsChange,
-}) => {
   return (
-    <div className="w-full md:w-1/2 p-4 overflow-y-auto">
-      <div className="space-y-4">
+    <div className="flex flex-col h-full border-l border-gray-200">
+      <div className="p-4 bg-white border-b border-gray-200">
+        <h2 className="text-xl font-bold">Function Calls</h2>
         <p className="text-gray-800 italic">
           State forked from{" "}
           <a
@@ -61,22 +41,31 @@ const FunctionCallsPanel: React.FC<FunctionCallsPanelProps> = ({
             Base.
           </a>
         </p>
-        {functionCalls.map((call, index) => (
-          <FunctionCallItem
-            key={index}
-            call={call}
-            index={index}
-            result={result[index]}
-            handleFunctionCallsChange={handleFunctionCallsChange}
-          />
-        ))}
       </div>
-      <button
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-        onClick={addFunctionCall}
-      >
-        Add Function Call
-      </button>
+      <div className="flex-grow overflow-y-auto p-4">
+        <div className="space-y-4">
+          {functionCalls.map((call, index) => (
+            <FunctionCallItem
+              key={index}
+              call={call}
+              index={index}
+              result={
+                currentFileFunctionCallResults
+                  ? currentFileFunctionCallResults[index]
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+      </div>
+      <div className="p-4 bg-white border-t border-gray-200">
+        <button
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={addFunctionCall}
+        >
+          Add Function Call
+        </button>
+      </div>
     </div>
   );
 };

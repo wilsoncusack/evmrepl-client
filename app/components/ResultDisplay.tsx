@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { FunctionCallResult } from "./FunctionCallsPanel";
 import TraceDisplay from "./TraceDispaly";
+import { FunctionCallResult } from "../types";
 
 interface ResultDisplayProps {
   result: FunctionCallResult;
