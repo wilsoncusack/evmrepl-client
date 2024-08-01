@@ -57,6 +57,10 @@ const FileExplorer: React.FC = () => {
     }
   };
 
+  if (!currentFile) {
+    return "Loading...";
+  }
+
   return (
     <div className="w-64 bg-gray-800 text-white h-full flex flex-col">
       <div className="p-4 border-b border-gray-700">

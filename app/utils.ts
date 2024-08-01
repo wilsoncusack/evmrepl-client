@@ -4,5 +4,5 @@ export function extractFileName(filePath: string): string {
   return match ? match[1] : filePath;
 }
 
-export const replacer = (key, value) =>
+export const replacer = (key: any, value: any) =>
   typeof value === "bigint" ? value.toString() : value;

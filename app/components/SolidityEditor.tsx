@@ -18,6 +18,7 @@ const SolidityEditor: React.FC = () => {
   }, [errors]);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
+    if (!currentFile) return;
     editorRef.current = editor;
     monacoRef.current = monaco;
 
@@ -42,6 +43,7 @@ const SolidityEditor: React.FC = () => {
   };
 
   useEffect(() => {
+    if (!currentFile) return;
     if (editorRef.current && monacoRef.current) {
       const currentModel = monacoRef.current.editor.getModel(
         monacoRef.current.Uri.parse(`file:///${currentFile.name}`),
