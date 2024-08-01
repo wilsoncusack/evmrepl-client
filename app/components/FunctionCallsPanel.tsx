@@ -22,10 +22,7 @@ const FunctionCallsPanel: React.FC = () => {
     if (!currentFile) return;
     setFilesFunctionCalls((prev) => ({
       ...prev,
-      [currentFile.id]: [
-        ...(prev[currentFile.id] || []),
-        { name: "", args: [] },
-      ],
+      [currentFile.id]: [...(prev[currentFile.id] || []), { rawInput: "" }],
     }));
   };
 

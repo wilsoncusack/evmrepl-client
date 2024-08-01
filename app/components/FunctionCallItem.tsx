@@ -32,7 +32,7 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
     (newCall: string, index: number) => {
       if (!currentFile || !currentFileCompilationResult) return;
       setError(undefined);
-      if (!newCall) return;
+      if (!newCall || newCall === "") return;
       try {
         const { name, args } = parseFunctionCall(newCall);
         const data = encodeFunctionData({

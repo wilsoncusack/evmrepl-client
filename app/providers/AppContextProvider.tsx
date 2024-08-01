@@ -108,8 +108,6 @@ export const AppProvider: React.FC<{
       return;
     }
 
-    console.log(currentFileFunctionCalls);
-
     if (currentFileFunctionCalls.length === 0) {
       return;
     }

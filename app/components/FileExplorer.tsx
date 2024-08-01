@@ -20,7 +20,7 @@ const FileExplorer: React.FC = () => {
     const newFile: SolidityFile = {
       id: crypto.randomUUID(),
       name: newFileName,
-      content: "// Your Solidity code here",
+      content: "pragma solidity 0.8.26;\n\n// Your Solidity code here",
     };
     setFiles([...files, newFile]);
   };
@@ -31,7 +31,7 @@ const FileExplorer: React.FC = () => {
       <ul>
         {files.map((file) => (
           <li
-            key={currentFile.id}
+            key={file.id}
             className={`cursor-pointer p-1 ${
               file.id === currentFile.id ? "bg-gray-200" : ""
             }`}
