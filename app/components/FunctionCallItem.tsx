@@ -19,8 +19,12 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
   index,
   result,
 }) => {
-  const { setFilesFunctionCalls, currentFile, currentFileCompilationResult } =
-    useAppContext();
+  const {
+    setFilesFunctionCalls,
+    currentFile,
+    currentFileCompilationResult,
+    clearCurrentFileFunctionCallResults,
+  } = useAppContext();
   const [error, setError] = useState<string | undefined>(undefined);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: only want this to run when compilation changes
@@ -93,6 +97,7 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
       newCalls.splice(index, 1);
       return { ...prev, [currentFile.id]: newCalls };
     });
+    clearCurrentFileFunctionCallResults();
   };
 
   return (

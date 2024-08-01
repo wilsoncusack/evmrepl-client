@@ -21,6 +21,7 @@ interface AppContextType {
   compilationResult?: CompilationResult;
   isCompiling: boolean;
   setIsCompiling: React.Dispatch<React.SetStateAction<boolean>>;
+  clearCurrentFileFunctionCallResults: () => void;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);

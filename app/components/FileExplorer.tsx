@@ -6,12 +6,19 @@ import { useAppContext } from "../hooks/useAppContext";
 import type { SolidityFile } from "../types";
 
 const FileExplorer: React.FC = () => {
-  const { files, currentFile, setCurrentFileId, setFiles } = useAppContext();
+  const {
+    files,
+    currentFile,
+    setCurrentFileId,
+    setFiles,
+    clearCurrentFileFunctionCallResults,
+  } = useAppContext();
 
   const onFileSelect = (fileId: string) => {
     const selectedFile = files.find((file) => file.id === fileId);
     if (selectedFile) {
       setCurrentFileId(selectedFile.id);
+      clearCurrentFileFunctionCallResults();
     }
   };
 

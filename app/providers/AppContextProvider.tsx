@@ -47,6 +47,10 @@ export const AppProvider: React.FC<{
     return files.find((f) => f.id === currentFileId);
   }, [currentFileId, files]);
 
+  const clearCurrentFileFunctionCallResults = useCallback(() => {
+    setCurrentFileFunctionCallResults(undefined);
+  }, []);
+
   const currentFileCompilationResult = useMemo(() => {
     if (!compilationResult || !currentFile) return;
 
@@ -184,11 +188,6 @@ export const AppProvider: React.FC<{
     debouncedRefreshFunctionCallResult,
   ]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on update
-  useEffect(() => {
-    setCurrentFileFunctionCallResults(undefined);
-  }, [currentFile]);
-
   const value = {
     files,
     setFiles,
@@ -201,6 +200,7 @@ export const AppProvider: React.FC<{
     setIsCompiling,
     currentFileCompilationResult,
     currentFileFunctionCallResults,
+    clearCurrentFileFunctionCallResults,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
