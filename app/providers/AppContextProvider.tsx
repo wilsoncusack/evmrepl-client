@@ -184,6 +184,11 @@ export const AppProvider: React.FC<{
     debouncedRefreshFunctionCallResult,
   ]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset on update
+  useEffect(() => {
+    setCurrentFileFunctionCallResults(undefined);
+  }, [currentFile]);
+
   const value = {
     files,
     setFiles,

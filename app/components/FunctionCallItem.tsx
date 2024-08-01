@@ -69,7 +69,7 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
     const match = call.match(/^(\w+)\((.*)\)$/);
 
     if (!match) {
-      return { error: "Invalid function call format" };
+      throw Error("Invalid function call format");
     }
 
     const [, name, argsString] = match;
