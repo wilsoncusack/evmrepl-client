@@ -2,6 +2,7 @@
 "use client";
 
 import type React from "react";
+import { useState } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import type { SolidityFile } from "../types";
 
@@ -13,6 +14,8 @@ const FileExplorer: React.FC = () => {
     setFiles,
     clearCurrentFileFunctionCallResults,
   } = useAppContext();
+  const [editingFileId, setEditingFileId] = useState<string | null>(null);
+  const [editingFileName, setEditingFileName] = useState("");
 
   const onFileSelect = (fileId: string) => {
     const selectedFile = files.find((file) => file.id === fileId);
@@ -32,6 +35,28 @@ const FileExplorer: React.FC = () => {
     setFiles([...files, newFile]);
   };
 
+  const startEditing = (fileId: string, fileName: string) => {
+    setEditingFileId(fileId);
+    setEditingFileName(fileName);
+  };
+
+  const saveFileName = (fileId: string) => {
+    setFiles(
+      files.map((file) =>
+        file.id === fileId ? { ...file, name: editingFileName } : file,
+      ),
+    );
+    setEditingFileId(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, fileId: string) => {
+    if (e.key === "Enter") {
+      saveFileName(fileId);
+    } else if (e.key === "Escape") {
+      setEditingFileId(null);
+    }
+  };
+
   return (
     <div className="w-64 bg-gray-800 text-white h-full flex flex-col">
       <div className="p-4 border-b border-gray-700">
@@ -44,9 +69,28 @@ const FileExplorer: React.FC = () => {
             className={`cursor-pointer p-3 hover:bg-gray-700 transition-colors ${
               file.id === currentFile.id ? "bg-gray-700" : ""
             }`}
-            onClick={() => onFileSelect(file.id)}
           >
-            {file.name}
+            {editingFileId === file.id ? (
+              <input
+                type="text"
+                value={editingFileName}
+                onChange={(e) => setEditingFileName(e.target.value)}
+                onBlur={() => saveFileName(file.id)}
+                onKeyDown={(e) => handleKeyDown(e, file.id)}
+                className="w-full bg-gray-600 text-white px-1 py-0.5 rounded"
+                autoFocus
+              />
+            ) : (
+              <div className="flex justify-between items-center">
+                <span onClick={() => onFileSelect(file.id)}>{file.name}</span>
+                <button
+                  onClick={() => startEditing(file.id, file.name)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✎
+                </button>
+              </div>
+            )}
           </li>
         ))}
       </ul>
