@@ -29,15 +29,6 @@ const FunctionCallsPanel: React.FC = () => {
     }));
   };
 
-  const handleFunctionCallsChange = (newCall: string, index: number) => {
-    if (!currentFile) return;
-    setFilesFunctionCalls((prev) => {
-      const newCalls = [...(prev[currentFile.id] || [])];
-      newCalls[index] = { ...newCalls[index], name: newCall };
-      return { ...prev, [currentFile.id]: newCalls };
-    });
-  };
-
   return (
     <div className="w-full md:w-1/2 p-4 overflow-y-auto">
       <div className="space-y-4">
@@ -57,8 +48,11 @@ const FunctionCallsPanel: React.FC = () => {
             key={index}
             call={call}
             index={index}
-            result={currentFileFunctionCallResults ? currentFileFunctionCallResults[index] : undefined}
-            handleFunctionCallsChange={handleFunctionCallsChange}
+            result={
+              currentFileFunctionCallResults
+                ? currentFileFunctionCallResults[index]
+                : undefined
+            }
           />
         ))}
       </div>

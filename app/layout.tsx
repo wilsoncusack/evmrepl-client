@@ -46,8 +46,13 @@ export default function RootLayout({
   const initialFunctionCalls: FileFunctionCalls = {
     [initialFiles[0].id]: [
       {
-        name: "get",
-        args: [],
+        rawInput: "get()",
+      },
+      {
+        rawInput: "set(1)",
+      },
+      {
+        rawInput: "get()",
       },
     ],
   };

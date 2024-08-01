@@ -98,15 +98,13 @@ export interface FileFunctionCalls {
 }
 
 export interface FunctionCall {
-  name: string;
+  rawInput: string;
+  name?: string;
   // biome-ignore lint/suspicious/noExplicitAny:
-  args: any[];
+  args?: any[];
   value?: bigint;
   caller?: Address;
-  // TODO: probably cut encoded caldata
   encodedCalldata?: Hex;
-  // consider having something for like parse errors. But maybe these never make it
-  error?: string;
 }
 
 export interface SolidityFile {

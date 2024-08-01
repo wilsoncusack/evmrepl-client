@@ -8,6 +8,7 @@ import type {
   FileFunctionCalls,
   FileId,
   FunctionCall,
+  FunctionCallResult,
   SolidityFile,
 } from "../types";
 import {
@@ -30,14 +31,17 @@ export const AppProvider: React.FC<{
 }> = ({ initialFiles, initialFunctionCalls, children }) => {
   const [files, setFiles] = useState<SolidityFile[]>(initialFiles);
   // TODO consider if there can be no current file
-  const [currentFileId, setCurrentFileId] = useState<FileId>(initialFiles[0].id);
+  const [currentFileId, setCurrentFileId] = useState<FileId>(
+    initialFiles[0].id,
+  );
   const [filesFunctionCalls, setFilesFunctionCalls] =
     useState<FileFunctionCalls>(initialFunctionCalls);
   const [compilationResult, setCompilationResult] = useState<
     CompilationResult | undefined
   >(undefined);
   const [isCompiling, setIsCompiling] = useState(false);
-  const [currentFileFunctionCallResults, setCurrentFileFunctionCallResults] = useState<FunctionCallResult[] | undefined>(undefined);
+  const [currentFileFunctionCallResults, setCurrentFileFunctionCallResults] =
+    useState<FunctionCallResult[] | undefined>(undefined);
 
   const currentFile = useMemo(() => {
     return files.find((f) => f.id === currentFileId);
@@ -47,10 +51,12 @@ export const AppProvider: React.FC<{
     if (!compilationResult || !currentFile) return;
 
     const compiledFiles = Object.keys(compilationResult.contracts);
-    const k = compiledFiles.find((file) => extractFileName(file) === currentFile.name);
+    const k = compiledFiles.find(
+      (file) => extractFileName(file) === currentFile.name,
+    );
     if (!k) {
       console.error("Could not find compiled result for current file");
-      return
+      return;
     }
 
     return Object.values(compilationResult.contracts[k])[0][0].contract;
@@ -95,7 +101,7 @@ export const AppProvider: React.FC<{
 
   const refreshFunctionCallResult = useCallback(async () => {
     if (!currentFile || !currentFileCompilationResult) return;
-    
+
     const currentFileFunctionCalls = filesFunctionCalls[currentFile.id];
     if (!currentFileFunctionCalls) {
       console.error("No function calls found for current file");
@@ -112,23 +118,19 @@ export const AppProvider: React.FC<{
     const abi = currentFileCompilationResult.abi;
     const bytecode = currentFileCompilationResult.evm.bytecode.object;
 
-    const encodedCalls: { calldata: Hex; value: string; caller: Address }[] = [];
-    for (const call of calls) {
-      if (call.name) {
-      console.log(call)
-      console.log('call name', call.name)
-      const data = encodeFunctionData({
-        abi,
-        functionName: call.name,
-        args: call.args,
-      });
-      console.log('data', data)
+    const filteredCalls = calls.filter(
+      (call) => call.name && call.encodedCalldata,
+    );
+    console.log("filtered calls", filteredCalls);
+    const encodedCalls: { calldata: Hex; value: string; caller: Address }[] =
+      [];
+    for (const call of filteredCalls) {
       encodedCalls.push({
-        calldata: data,
+        // biome-ignore lint/style/noNonNullAssertion:
+        calldata: call.encodedCalldata!,
         value: "0",
         caller: call.caller || zeroAddress,
       });
-    }
     }
 
     try {
@@ -154,7 +156,8 @@ export const AppProvider: React.FC<{
           }),
         );
         return {
-          call: calls[i].name,
+          // biome-ignore lint/style/noNonNullAssertion: all filtered calls have a name
+          call: filteredCalls[i].name!,
           gasUsed: result.gasUsed,
           response: returned !== undefined ? String(returned) : undefined,
           logs,
@@ -194,7 +197,7 @@ export const AppProvider: React.FC<{
     isCompiling,
     setIsCompiling,
     currentFileCompilationResult,
-    currentFileFunctionCallResults
+    currentFileFunctionCallResults,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

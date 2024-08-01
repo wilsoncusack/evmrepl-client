@@ -1,25 +1,89 @@
 // components/FunctionCallItem.tsx
 "use client";
 
-import React from "react";
+import type React from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import ResultDisplay from "./ResultDisplay";
-import { FunctionCall, FunctionCallResult } from "../types";
+import type { FunctionCall, FunctionCallResult } from "../types";
+import { encodeFunctionData } from "viem";
 
 interface FunctionCallItemProps {
-  call: FunctionCall
+  call: FunctionCall;
   index: number;
-  result?: FunctionCallResult
-  handleFunctionCallsChange: (newCall: string, index: number) => void;
+  result?: FunctionCallResult;
 }
 
 const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
   call,
   index,
-  handleFunctionCallsChange,
-  result
+  result,
 }) => {
-  const { setFilesFunctionCalls, currentFile } = useAppContext();
+  const { setFilesFunctionCalls, currentFile, currentFileCompilationResult } =
+    useAppContext();
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only want this to run when compilation changes
+  useEffect(() => {
+    handleFunctionCallsChange(call.rawInput, index);
+  }, [currentFileCompilationResult]);
+
+  const handleFunctionCallsChange = useCallback(
+    (newCall: string, index: number) => {
+      if (!currentFile || !currentFileCompilationResult) return;
+      setError(undefined);
+      if (!newCall) return;
+      try {
+        const { name, args } = parseFunctionCall(newCall);
+        const data = encodeFunctionData({
+          abi: currentFileCompilationResult.abi,
+          functionName: name,
+          args: args,
+        });
+
+        setFilesFunctionCalls((prev) => {
+          const newCalls = [...(prev[currentFile.id] || [])];
+          newCalls[index] = {
+            ...newCalls[index],
+            args,
+            name,
+            rawInput: newCall,
+            encodedCalldata: data,
+          };
+          return { ...prev, [currentFile.id]: newCalls };
+        });
+      } catch (e) {
+        setError(String(e));
+        setFilesFunctionCalls((prev) => {
+          const newCalls: FunctionCall[] = [...(prev[currentFile.id] || [])];
+          newCalls[index] = { ...newCalls[index], rawInput: newCall };
+          return { ...prev, [currentFile.id]: newCalls };
+        });
+      }
+    },
+    [currentFile, currentFileCompilationResult, setFilesFunctionCalls],
+  );
+
+  const parseFunctionCall = (call: string): Partial<FunctionCall> => {
+    // Regular expression to match function name and arguments
+    const match = call.match(/^(\w+)\((.*)\)$/);
+
+    if (!match) {
+      return { error: "Invalid function call format" };
+    }
+
+    const [, name, argsString] = match;
+
+    // Parse arguments
+    let args: any[] = [];
+    if (argsString.trim() !== "") {
+      args = argsString.split(",").map((arg) => {
+        return arg.trim();
+      });
+    }
+
+    return { name, args };
+  };
 
   const handleDelete = () => {
     if (!currentFile) return;
@@ -37,13 +101,14 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
         <div className="flex-grow relative">
           <textarea
             className="w-full p-2 bg-white text-gray-800 resize-none focus:outline-none font-mono border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-            value={call.name}
+            value={call.rawInput}
             onChange={(e) => handleFunctionCallsChange(e.target.value, index)}
             rows={1}
             placeholder="Enter function call (e.g., set(1))"
           />
         </div>
         <button
+          type="button"
           className="ml-2 p-1 text-red-500 hover:bg-red-100 rounded"
           onClick={handleDelete}
         >
@@ -61,6 +126,7 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
           </svg>
         </button>
       </div>
+      {error && <div className="p-2 text-red-500 text-sm">{error}</div>}
       {result && <ResultDisplay result={result} />}
     </div>
   );
