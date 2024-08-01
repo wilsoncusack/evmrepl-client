@@ -8,7 +8,7 @@ const CompileErrorDisplay: React.FC<ErrorDisplayProps> = ({ errors }) => {
   if (errors.length === 0) return null;
 
   return (
-    <div className="mt-4 p-4 bg-red-100 rounded-lg">
+    <div className="p-4 bg-red-100">
       <h3 className="text-lg font-semibold text-red-800 mb-2">
         Compilation Issues:
       </h3>

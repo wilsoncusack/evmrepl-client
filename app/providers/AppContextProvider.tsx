@@ -66,41 +66,38 @@ export const AppProvider: React.FC<{
     return Object.values(compilationResult.contracts[k])[0][0].contract;
   }, [currentFile, compilationResult]);
 
-  useEffect(() => {
-    const compileCode = async () => {
-      if (files.length === 0) return;
+  const debouncedCompileCode = useDebounce(async () => {
+    if (files.length === 0) return;
 
-      setIsCompiling(true);
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_SERVER}/compile_solidity`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            // TODO may need to strip ID
-            body: JSON.stringify({ files }),
+    setIsCompiling(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER}/compile_solidity`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({ files }),
+        },
+      );
 
-        if (!response.ok) {
-          throw new Error("Compilation failed");
-        }
-
-        const result = await response.json();
-        setCompilationResult(result);
-      } catch (error) {
-        // TODO bubble this error up
-        console.error("Compilation error:", error);
-        setCompilationResult(undefined);
-      } finally {
-        setIsCompiling(false);
+      if (!response.ok) {
+        throw new Error("Compilation failed");
       }
-    };
 
-    // TODO debounce this
-    compileCode();
+      const result = await response.json();
+      setCompilationResult(result);
+    } catch (error) {
+      console.error("Compilation error:", error);
+      setCompilationResult(undefined);
+    } finally {
+      setIsCompiling(false);
+    }
+  }, 1000);
+
+  useEffect(() => {
+    debouncedCompileCode();
   }, [files]);
 
   const refreshFunctionCallResult = useCallback(async () => {
