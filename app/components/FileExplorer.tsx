@@ -5,6 +5,7 @@ import type React from "react";
 import { useState } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import type { SolidityFile } from "../types";
+import LoadContractsModal from "./LoadContractsModal";
 
 const FileExplorer: React.FC = () => {
   const {
@@ -16,6 +17,8 @@ const FileExplorer: React.FC = () => {
   } = useAppContext();
   const [editingFileId, setEditingFileId] = useState<string | null>(null);
   const [editingFileName, setEditingFileName] = useState("");
+  const [isLoadContractsModalOpen, setIsLoadContractsModalOpen] =
+    useState(false);
 
   const onFileSelect = (fileId: string) => {
     const selectedFile = files.find((file) => file.id === fileId);
@@ -98,13 +101,26 @@ const FileExplorer: React.FC = () => {
           </li>
         ))}
       </ul>
-      <button
-        type="button"
-        className="m-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
-        onClick={onAddFile}
-      >
-        Add File
-      </button>
+      <div className="flex flex-col m-4 space-y-2">
+        <button
+          type="button"
+          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
+          onClick={onAddFile}
+        >
+          Add File
+        </button>
+        <button
+          type="button"
+          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors"
+          onClick={() => setIsLoadContractsModalOpen(true)}
+        >
+          Load Contracts
+        </button>
+      </div>
+      <LoadContractsModal
+        isOpen={isLoadContractsModalOpen}
+        onClose={() => setIsLoadContractsModalOpen(false)}
+      />
     </div>
   );
 };
