@@ -1,3 +1,4 @@
+// IndexPage.tsx
 "use client";
 import SolidityEditor from "./components/SolidityEditor";
 import FunctionCallsPanel from "./components/FunctionCallsPanel";
@@ -5,15 +6,17 @@ import FileExplorer from "./components/FileExplorer";
 import { useAppContext } from "./hooks/useAppContext";
 
 const IndexPage = () => {
-  const { compilationResult } = useAppContext();
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-100">
-      {/* {JSON.stringify(compilationResult)} */}
-      <div className="w-1/4 p-4">
-        <FileExplorer />
+    <div className="flex h-screen bg-gray-100">
+      <FileExplorer />
+      <div className="flex flex-grow overflow-hidden">
+        <div className="w-3/5 h-full overflow-hidden">
+          <SolidityEditor />
+        </div>
+        <div className="w-2/5 h-full overflow-hidden">
+          <FunctionCallsPanel />
+        </div>
       </div>
-      <SolidityEditor />
-      <FunctionCallsPanel />
     </div>
   );
 };

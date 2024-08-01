@@ -27,8 +27,9 @@ const FunctionCallsPanel: React.FC = () => {
   };
 
   return (
-    <div className="w-full md:w-1/2 p-4 overflow-y-auto">
-      <div className="space-y-4">
+    <div className="flex flex-col h-full border-l border-gray-200">
+      <div className="p-4 bg-white border-b border-gray-200">
+        <h2 className="text-xl font-bold">Function Calls</h2>
         <p className="text-gray-800 italic">
           State forked from{" "}
           <a
@@ -40,25 +41,31 @@ const FunctionCallsPanel: React.FC = () => {
             Base.
           </a>
         </p>
-        {functionCalls.map((call, index) => (
-          <FunctionCallItem
-            key={index}
-            call={call}
-            index={index}
-            result={
-              currentFileFunctionCallResults
-                ? currentFileFunctionCallResults[index]
-                : undefined
-            }
-          />
-        ))}
       </div>
-      <button
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
-        onClick={addFunctionCall}
-      >
-        Add Function Call
-      </button>
+      <div className="flex-grow overflow-y-auto p-4">
+        <div className="space-y-4">
+          {functionCalls.map((call, index) => (
+            <FunctionCallItem
+              key={index}
+              call={call}
+              index={index}
+              result={
+                currentFileFunctionCallResults
+                  ? currentFileFunctionCallResults[index]
+                  : undefined
+              }
+            />
+          ))}
+        </div>
+      </div>
+      <div className="p-4 bg-white border-t border-gray-200">
+        <button
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+          onClick={addFunctionCall}
+        >
+          Add Function Call
+        </button>
+      </div>
     </div>
   );
 };

@@ -62,11 +62,11 @@ const SolidityEditor: React.FC = () => {
   };
 
   return (
-    <div className="w-full md:w-3/4 p-4">
+    <div className="h-full overflow-hidden">
       {relevantErrors.length > 0 && (
         <CompileErrorDisplay errors={relevantErrors} />
       )}
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+      <div className="bg-white shadow-lg overflow-hidden border border-gray-200">
         <div className="relative flex h-[calc(100vh-10rem)] p-4">
           {currentFile && (
             <Editor

@@ -26,14 +26,16 @@ const FileExplorer: React.FC = () => {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200 p-4">
-      <h3 className="font-bold mb-2">Files</h3>
-      <ul>
+    <div className="w-64 bg-gray-800 text-white h-full flex flex-col">
+      <div className="p-4 border-b border-gray-700">
+        <h3 className="font-bold text-xl">Files</h3>
+      </div>
+      <ul className="flex-grow overflow-y-auto">
         {files.map((file) => (
           <li
             key={file.id}
-            className={`cursor-pointer p-1 ${
-              file.id === currentFile.id ? "bg-gray-200" : ""
+            className={`cursor-pointer p-3 hover:bg-gray-700 transition-colors ${
+              file.id === currentFile.id ? "bg-gray-700" : ""
             }`}
             onClick={() => onFileSelect(file.id)}
           >
@@ -43,7 +45,7 @@ const FileExplorer: React.FC = () => {
       </ul>
       <button
         type="button"
-        className="mt-2 bg-blue-500 text-white px-2 py-1 rounded"
+        className="m-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors"
         onClick={onAddFile}
       >
         Add File
