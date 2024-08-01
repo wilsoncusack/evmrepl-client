@@ -111,7 +111,7 @@ const FileExplorer: React.FC = () => {
         </button>
         <button
           type="button"
-          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors"
+          className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded transition-colors"
           onClick={() => setIsLoadContractsModalOpen(true)}
         >
           Load Contracts
