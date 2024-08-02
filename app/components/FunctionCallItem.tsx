@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import ResultDisplay from "./ResultDisplay";
 import type { FunctionCall, FunctionCallResult } from "../types";
-import { encodeFunctionData, isHex } from "viem";
+import { Hex, encodeFunctionData, isHex } from "viem";
 
 interface FunctionCallItemProps {
   call: FunctionCall;

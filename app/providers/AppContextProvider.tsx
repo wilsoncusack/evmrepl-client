@@ -147,7 +147,7 @@ export const AppProvider: React.FC<{
       const results = response.data;
       console.log("results", results);
       console.log("calls", calls);
-      const output = results.map((result, i) => {
+      const output: FunctionCallResult[] = results.map((result, i) => {
         console.log("result", i);
         console.log(calls[i]);
         console.log(filteredCalls[i]);
@@ -156,8 +156,8 @@ export const AppProvider: React.FC<{
             call: filteredCalls[i].name || "",
             gasUsed: result.gasUsed,
             response: result.result,
-            // TODO: I think this going to bork the log display
-            logs: result.logs,
+            // TODO: try to dump raw logs
+            rawLogs: result.logs,
             traces: result.traces,
           };
         }
@@ -188,6 +188,7 @@ export const AppProvider: React.FC<{
           response: returned,
           logs,
           traces: result.traces,
+          rawLogs: result.logs,
         };
       });
 

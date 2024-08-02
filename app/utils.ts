@@ -1,4 +1,4 @@
-import { type Chain, createPublicClient, http } from "viem";
+import { type Chain, createPublicClient, http, Address, Hex } from "viem";
 
 export function extractFileName(filePath: string): string {
   // This regex matches everything after the last '/' or '\' in the path
@@ -16,7 +16,7 @@ export function getRandomAddress(): `0x${string}` {
 export async function fetchBytecodeFromChain(
   chain: Chain,
   address: Address,
-): Promise<string> {
+): Promise<Hex | undefined> {
   const client = createPublicClient({
     chain,
     transport: http(),

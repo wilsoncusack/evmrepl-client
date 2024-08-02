@@ -31,7 +31,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
 
       <div className="space-y-1">
         <span className="text-sm font-semibold text-gray-600">Logs:</span>
-        {result.logs.map((log, i) => (
+        {result.logs?.map((log, i) => (
           <div key={i} className="ml-5 p-2 bg-yellow-50 rounded-md">
             <span className="font-mono text-sm text-yellow-700">
               {log.eventName}
@@ -41,10 +41,22 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
             </span>
           </div>
         ))}
+
+        {!result.logs &&
+          result.rawLogs.map((log, i) => (
+            <div key={i} className="ml-5 p-2 bg-yellow-50 rounded-md">
+              <span className="font-mono text-sm text-yellow-700">
+                <p>address: {log.address}</p>
+                <p>topics: {log.topics}</p>
+                <p>data: {log.data}</p>
+              </span>
+            </div>
+          ))}
       </div>
       {result.traces && (
         <div>
           <button
+            type="button"
             onClick={() => setShowTraces(!showTraces)}
             className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
           >

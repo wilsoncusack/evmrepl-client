@@ -15,7 +15,7 @@ import {
   zora,
   mainnet,
 } from "viem/chains";
-import { Chain } from "viem";
+import { Address, Chain, Hex } from "viem";
 
 interface LoadContractsModalProps {
   isOpen: boolean;
@@ -37,7 +37,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState<Address | undefined>(undefined);
   const [chainId, setChainId] = useState<number>(base.id); // Default to Base
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +46,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
 
   const loadContractsFromSourceify = async (
     chainId: number,
-    address: string,
+    address: Address,
   ): Promise<SolidityFile[]> => {
     try {
       const response = await axios.get(
@@ -117,7 +117,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
     return processedContent;
   };
 
-  const loadContract = async (chainId: number, address: string) => {
+  const loadContract = async (chainId: number, address: Address) => {
     setIsLoading(true);
     setError(null);
     setNoCodeFound(false);
@@ -147,7 +147,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
         name: `Contract_${address.slice(0, 6)}`,
         content: "",
         address,
-        bytecode,
+        bytecode: bytecode as Hex,
       };
 
       addNewContract(newFile);
@@ -162,6 +162,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!address) return;
     await loadContract(Number(chainId), address);
   };
 
@@ -203,7 +204,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
               type="text"
               id="address"
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={(e) => setAddress(e.target.value as Address)}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-gray-800"
               placeholder="0x..."
             />
