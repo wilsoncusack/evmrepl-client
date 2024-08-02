@@ -30,7 +30,6 @@ export const AppProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ initialFiles, initialFunctionCalls, children }) => {
   const [files, setFiles] = useState<SolidityFile[]>(initialFiles);
-  // TODO consider if there can be no current file
   const [currentFileId, setCurrentFileId] = useState<FileId>(
     initialFiles[0].id,
   );
@@ -115,7 +114,7 @@ export const AppProvider: React.FC<{
 
     const calls = currentFileFunctionCalls;
     const abi = currentFileCompilationResult.abi;
-    const bytecode = currentFileCompilationResult.evm.bytecode.object;
+    const bytecode = currentFileCompilationResult.evm.deployedBytecode.object;
 
     const filteredCalls = calls.filter(
       (call) => call.name && call.encodedCalldata,
@@ -138,6 +137,7 @@ export const AppProvider: React.FC<{
         {
           bytecode,
           calls: encodedCalls,
+          address: currentFile.address,
         },
       );
       const results = response.data;

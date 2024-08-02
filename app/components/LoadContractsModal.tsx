@@ -56,6 +56,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
               id: crypto.randomUUID(),
               name,
               content: processFileContent(content, name),
+              address,
             };
           }),
       );

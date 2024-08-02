@@ -1,15 +1,17 @@
 // components/SolidityEditor.tsx
 "use client";
 
-import React, { useRef, useMemo, useEffect } from "react";
+import React, { useRef, useMemo, useEffect, useState } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import CompileErrorDisplay from "./CompileErrorDisplay";
 import { useAppContext } from "../hooks/useAppContext";
+import CopyToClipboard from "react-copy-to-clipboard";
 
 const SolidityEditor: React.FC = () => {
   const { files, currentFile, setFiles, compilationResult } = useAppContext();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
+  const [copied, setCopied] = useState(false);
 
   const errors = compilationResult?.errors || [];
 
@@ -63,10 +65,53 @@ const SolidityEditor: React.FC = () => {
     );
   };
 
+  const handleCopy = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="h-full overflow-hidden">
-      <div className="bg-white shadow-lg overflow-hidden border border-gray-200">
-        <div className="relative flex h-[calc(100vh-10rem)] p-4 pb-0">
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex-grow bg-white shadow-lg overflow-hidden border border-gray-200">
+        {currentFile?.address && (
+          <div className="p-2 bg-gray-100 flex items-center justify-start">
+            <span className="text-sm font-mono mr-2">Contract Address:</span>
+            <div className="flex items-center bg-white border border-gray-300 rounded-md overflow-hidden">
+              <span className="text-sm font-mono px-2 py-1">
+                {currentFile.address}
+              </span>
+              <CopyToClipboard text={currentFile.address} onCopy={handleCopy}>
+                <button className="px-2 py-1 bg-gray-200 hover:bg-gray-300 transition-colors text-xs border-l border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  {copied ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-green-600"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-gray-600"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                  )}
+                </button>
+              </CopyToClipboard>
+            </div>
+          </div>
+        )}
+        <div className="h-full p-4 pb-0">
           {currentFile && (
             <Editor
               height="100%"
@@ -91,7 +136,9 @@ const SolidityEditor: React.FC = () => {
         </div>
       </div>
       {relevantErrors.length > 0 && (
-        <CompileErrorDisplay errors={relevantErrors} />
+        <div className="flex-shrink-0">
+          <CompileErrorDisplay errors={relevantErrors} />
+        </div>
       )}
     </div>
   );

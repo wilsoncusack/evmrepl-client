@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import type { SolidityFile } from "../types";
 import LoadContractsModal from "./LoadContractsModal";
+import { getRandomAddress } from "../utils";
 
 const FileExplorer: React.FC = () => {
   const {
@@ -34,8 +35,25 @@ const FileExplorer: React.FC = () => {
       id: crypto.randomUUID(),
       name: newFileName,
       content: "pragma solidity 0.8.26;\n\n// Your Solidity code here",
+      address: getRandomAddress(), // Add this line
     };
     setFiles([...files, newFile]);
+  };
+
+  const deleteFile = (fileId: string) => {
+    if (files.length <= 1) {
+      alert("Cannot delete the last file.");
+      return;
+    }
+
+    setFiles(files.filter((file) => file.id !== fileId));
+    if (currentFile?.id === fileId) {
+      clearCurrentFileFunctionCallResults();
+      const newCurrentFile = files.find((file) => file.id !== fileId);
+      if (newCurrentFile) {
+        setCurrentFileId(newCurrentFile.id);
+      }
+    }
   };
 
   const startEditing = (fileId: string, fileName: string) => {
@@ -74,7 +92,7 @@ const FileExplorer: React.FC = () => {
           <li
             key={file.id}
             className={`cursor-pointer p-3 hover:bg-gray-700 transition-colors ${
-              file.id === currentFile.id ? "bg-gray-700" : ""
+              file.id === currentFile?.id ? "bg-gray-700" : ""
             }`}
           >
             {editingFileId === file.id ? (
@@ -89,13 +107,32 @@ const FileExplorer: React.FC = () => {
               />
             ) : (
               <div className="flex justify-between items-center">
-                <span onClick={() => onFileSelect(file.id)}>{file.name}</span>
-                <button
-                  onClick={() => startEditing(file.id, file.name)}
-                  className="text-gray-400 hover:text-white"
+                <span
+                  onClick={() => onFileSelect(file.id)}
+                  title={file.name}
+                  className="truncate max-w-[120px]"
                 >
-                  ✎
-                </button>
+                  {file.name}
+                </span>
+                {file.address && (
+                  <span className="text-xs text-gray-500 ml-2">
+                    {file.address.slice(0, 6)}...
+                  </span>
+                )}
+                <div className="min-w-[40px]">
+                  <button
+                    onClick={() => startEditing(file.id, file.name)}
+                    className="text-gray-400 hover:text-white mr-2"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    onClick={() => deleteFile(file.id)}
+                    className="text-red-400 hover:text-red-600"
+                  >
+                    🗑️
+                  </button>
+                </div>
               </div>
             )}
           </li>

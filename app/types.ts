@@ -111,6 +111,7 @@ export interface SolidityFile {
   id: FileId;
   name: string;
   content: string;
+  address: Address;
 }
 
 export type ExecutionResponse = {

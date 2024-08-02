@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { AppProvider } from "./providers/AppContextProvider";
 import { randomUUID } from "crypto";
 import { FileFunctionCalls } from "./types";
+import { getRandomAddress } from "./utils";
 
 const simpleStorageSolidityCode = `pragma solidity 0.8.26;
 
@@ -41,6 +42,7 @@ export default function RootLayout({
       id: randomUUID(),
       name: "SimpleStorage.sol",
       content: simpleStorageSolidityCode,
+      address: getRandomAddress(),
     },
   ];
   const initialFunctionCalls: FileFunctionCalls = {
