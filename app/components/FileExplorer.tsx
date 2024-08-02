@@ -119,7 +119,7 @@ const FileExplorer: React.FC = () => {
                     {file.address.slice(0, 6)}...
                   </span>
                 )}
-                <div className="min-w-[40px]">
+                <div className="min-w-[50px]">
                   <button
                     onClick={() => startEditing(file.id, file.name)}
                     className="text-gray-400 hover:text-white mr-2"
