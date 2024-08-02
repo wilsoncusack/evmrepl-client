@@ -112,27 +112,35 @@ const SolidityEditor: React.FC = () => {
           </div>
         )}
         <div className="h-full p-4 pb-0">
-          {currentFile && (
-            <Editor
-              height="100%"
-              defaultLanguage="sol"
-              path={currentFile.name}
-              value={currentFile.content}
-              onChange={handleEditorChange}
-              onMount={handleEditorDidMount}
-              options={{
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                fontSize: 14,
-                lineNumbers: "on",
-                glyphMargin: true,
-                folding: true,
-                lineNumbersMinChars: 0,
-                overviewRulerBorder: false,
-                language: "sol",
-              }}
-            />
-          )}
+          {currentFile &&
+            (currentFile.content ? (
+              <Editor
+                height="100%"
+                defaultLanguage="sol"
+                path={currentFile.name}
+                value={currentFile.content}
+                onChange={handleEditorChange}
+                onMount={handleEditorDidMount}
+                options={{
+                  minimap: { enabled: false },
+                  scrollBeyondLastLine: false,
+                  fontSize: 14,
+                  lineNumbers: "on",
+                  glyphMargin: true,
+                  folding: true,
+                  lineNumbersMinChars: 0,
+                  overviewRulerBorder: false,
+                  language: "sol",
+                }}
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <p className="text-gray-500">
+                  This contract was loaded from bytecode. Source code is not
+                  available.
+                </p>
+              </div>
+            ))}
         </div>
       </div>
       {relevantErrors.length > 0 && (

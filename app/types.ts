@@ -65,7 +65,8 @@ export type FunctionCallResult = {
   call: string;
   gasUsed: string;
   response: string | undefined;
-  logs: DecodeEventLogReturnType[];
+  logs?: DecodeEventLogReturnType[];
+  rawLogs: Log[];
   traces: {
     arena: Array<{
       parent: null | number;
@@ -112,6 +113,7 @@ export interface SolidityFile {
   name: string;
   content: string;
   address: Address;
+  bytecode?: Hex;
 }
 
 export type ExecutionResponse = {

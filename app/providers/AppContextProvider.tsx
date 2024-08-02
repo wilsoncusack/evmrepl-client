@@ -100,7 +100,7 @@ export const AppProvider: React.FC<{
   }, [files]);
 
   const refreshFunctionCallResult = useCallback(async () => {
-    if (!currentFile || !currentFileCompilationResult) return;
+    if (!currentFile) return;
 
     const currentFileFunctionCalls = filesFunctionCalls[currentFile.id];
     if (!currentFileFunctionCalls) {
@@ -113,13 +113,17 @@ export const AppProvider: React.FC<{
     }
 
     const calls = currentFileFunctionCalls;
-    const abi = currentFileCompilationResult.abi;
-    const bytecode = currentFileCompilationResult.evm.deployedBytecode.object;
+    const abi = currentFileCompilationResult?.abi;
+    const bytecode =
+      currentFileCompilationResult?.evm.deployedBytecode.object ||
+      currentFile.bytecode;
+    if (!bytecode) {
+      console.error("no bytecode to use for function calls");
+      return;
+    }
 
-    const filteredCalls = calls.filter(
-      (call) => call.name && call.encodedCalldata,
-    );
-    console.log("filtered calls", filteredCalls);
+    const filteredCalls = calls.filter((call) => call.encodedCalldata);
+
     const encodedCalls: { calldata: Hex; value: string; caller: Address }[] =
       [];
     for (const call of filteredCalls) {
@@ -141,12 +145,31 @@ export const AppProvider: React.FC<{
         },
       );
       const results = response.data;
-      const output = results.map((result, i) => {
-        const returned = decodeFunctionResult({
-          abi,
-          functionName: calls[i].name,
-          data: result.result,
-        });
+
+      const output: FunctionCallResult[] = results.map((result, i) => {
+        if (!abi) {
+          return {
+            call: filteredCalls[i].name || "",
+            gasUsed: result.gasUsed,
+            response: result.result,
+            // TODO: try to dump raw logs
+            rawLogs: result.logs,
+            traces: result.traces,
+          };
+        }
+
+        let returned: string;
+        try {
+          returned = String(
+            decodeFunctionResult({
+              abi,
+              functionName: calls[i].name,
+              data: result.result,
+            }),
+          );
+        } catch (e) {
+          returned = result.result;
+        }
         const logs: DecodeEventLogReturnType[] = result.logs.map((log) =>
           decodeEventLog({
             abi,
@@ -154,13 +177,15 @@ export const AppProvider: React.FC<{
             topics: log.topics,
           }),
         );
+
         return {
           // biome-ignore lint/style/noNonNullAssertion: all filtered calls have a name
           call: filteredCalls[i].name!,
           gasUsed: result.gasUsed,
-          response: returned !== undefined ? String(returned) : undefined,
+          response: returned,
           logs,
           traces: result.traces,
+          rawLogs: result.logs,
         };
       });
 
@@ -169,6 +194,16 @@ export const AppProvider: React.FC<{
       console.error("Execution error:", error);
     }
   }, [currentFile, filesFunctionCalls, currentFileCompilationResult]);
+
+  const addNewContract = useCallback((newFile: SolidityFile) => {
+    setFiles((prevFiles) => [...prevFiles, newFile]);
+    clearCurrentFileFunctionCallResults();
+    setCurrentFileId(newFile.id);
+    setFilesFunctionCalls((prev) => ({
+      ...prev,
+      [newFile.id]: [{ rawInput: "" }],
+    }));
+  }, []);
 
   const debouncedRefreshFunctionCallResult = useDebounce(
     refreshFunctionCallResult,
@@ -198,6 +233,7 @@ export const AppProvider: React.FC<{
     currentFileCompilationResult,
     currentFileFunctionCallResults,
     clearCurrentFileFunctionCallResults,
+    addNewContract,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
