@@ -112,6 +112,7 @@ export interface SolidityFile {
   name: string;
   content: string;
   address: Address;
+  bytecode?: Hex;
 }
 
 export type ExecutionResponse = {

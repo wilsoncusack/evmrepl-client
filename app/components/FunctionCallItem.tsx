@@ -6,18 +6,20 @@ import { useCallback, useEffect, useState } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import ResultDisplay from "./ResultDisplay";
 import type { FunctionCall, FunctionCallResult } from "../types";
-import { encodeFunctionData } from "viem";
+import { encodeFunctionData, isHex } from "viem";
 
 interface FunctionCallItemProps {
   call: FunctionCall;
   index: number;
   result?: FunctionCallResult;
+  isRawCalldata: boolean;
 }
 
 const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
   call,
   index,
   result,
+  isRawCalldata,
 }) => {
   const {
     setFilesFunctionCalls,
@@ -34,25 +36,33 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
 
   const handleFunctionCallsChange = useCallback(
     (newCall: string, index: number) => {
-      if (!currentFile || !currentFileCompilationResult) return;
+      if (
+        !currentFile ||
+        (!currentFileCompilationResult && !currentFile.bytecode)
+      )
+        return;
       setError(undefined);
       if (!newCall || newCall === "") return;
       try {
-        const { name, args } = parseFunctionCall(newCall);
-        const data = encodeFunctionData({
-          abi: currentFileCompilationResult.abi,
-          functionName: name,
-          args: args,
-        });
+        let encodedCalldata: Hex;
+        if (isRawCalldata || isHex(newCall)) {
+          encodedCalldata = newCall as Hex;
+        } else {
+          if (!currentFileCompilationResult) return;
+          const { name, args } = parseFunctionCall(newCall);
+          encodedCalldata = encodeFunctionData({
+            abi: currentFileCompilationResult.abi,
+            functionName: name,
+            args: args,
+          });
+        }
 
         setFilesFunctionCalls((prev) => {
           const newCalls = [...(prev[currentFile.id] || [])];
           newCalls[index] = {
             ...newCalls[index],
-            args,
-            name,
             rawInput: newCall,
-            encodedCalldata: data,
+            encodedCalldata,
           };
           return { ...prev, [currentFile.id]: newCalls };
         });
@@ -65,7 +75,12 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
         });
       }
     },
-    [currentFile, currentFileCompilationResult, setFilesFunctionCalls],
+    [
+      currentFile,
+      currentFileCompilationResult,
+      setFilesFunctionCalls,
+      isRawCalldata,
+    ],
   );
 
   const parseFunctionCall = (call: string): Partial<FunctionCall> => {
@@ -109,7 +124,11 @@ const FunctionCallItem: React.FC<FunctionCallItemProps> = ({
             value={call.rawInput}
             onChange={(e) => handleFunctionCallsChange(e.target.value, index)}
             rows={1}
-            placeholder="Enter function call (e.g., set(1))"
+            placeholder={
+              isRawCalldata
+                ? "Enter calldata (e.g., 0x...)"
+                : "Enter function call (e.g., set(1))"
+            }
           />
         </div>
         <button

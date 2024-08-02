@@ -54,6 +54,7 @@ const FunctionCallsPanel: React.FC = () => {
                   ? currentFileFunctionCallResults[index]
                   : undefined
               }
+              isRawCalldata={!currentFile?.content}
             />
           ))}
         </div>

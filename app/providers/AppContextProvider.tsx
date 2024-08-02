@@ -100,7 +100,7 @@ export const AppProvider: React.FC<{
   }, [files]);
 
   const refreshFunctionCallResult = useCallback(async () => {
-    if (!currentFile || !currentFileCompilationResult) return;
+    if (!currentFile) return;
 
     const currentFileFunctionCalls = filesFunctionCalls[currentFile.id];
     if (!currentFileFunctionCalls) {
@@ -113,13 +113,17 @@ export const AppProvider: React.FC<{
     }
 
     const calls = currentFileFunctionCalls;
-    const abi = currentFileCompilationResult.abi;
-    const bytecode = currentFileCompilationResult.evm.deployedBytecode.object;
+    const abi = currentFileCompilationResult?.abi;
+    const bytecode =
+      currentFileCompilationResult?.evm.deployedBytecode.object ||
+      currentFile.bytecode;
+    if (!bytecode) {
+      console.error("no bytecode to use for function calls");
+      return;
+    }
 
-    const filteredCalls = calls.filter(
-      (call) => call.name && call.encodedCalldata,
-    );
-    console.log("filtered calls", filteredCalls);
+    const filteredCalls = calls.filter((call) => call.encodedCalldata);
+
     const encodedCalls: { calldata: Hex; value: string; caller: Address }[] =
       [];
     for (const call of filteredCalls) {
@@ -141,12 +145,35 @@ export const AppProvider: React.FC<{
         },
       );
       const results = response.data;
+      console.log("results", results);
+      console.log("calls", calls);
       const output = results.map((result, i) => {
-        const returned = decodeFunctionResult({
-          abi,
-          functionName: calls[i].name,
-          data: result.result,
-        });
+        console.log("result", i);
+        console.log(calls[i]);
+        console.log(filteredCalls[i]);
+        if (!abi) {
+          return {
+            call: filteredCalls[i].name || "",
+            gasUsed: result.gasUsed,
+            response: result.result,
+            // TODO: I think this going to bork the log display
+            logs: result.logs,
+            traces: result.traces,
+          };
+        }
+
+        let returned: string;
+        try {
+          returned = String(
+            decodeFunctionResult({
+              abi,
+              functionName: calls[i].name,
+              data: result.result,
+            }),
+          );
+        } catch (e) {
+          returned = result.result;
+        }
         const logs: DecodeEventLogReturnType[] = result.logs.map((log) =>
           decodeEventLog({
             abi,
@@ -158,7 +185,7 @@ export const AppProvider: React.FC<{
           // biome-ignore lint/style/noNonNullAssertion: all filtered calls have a name
           call: filteredCalls[i].name!,
           gasUsed: result.gasUsed,
-          response: returned !== undefined ? String(returned) : undefined,
+          response: returned,
           logs,
           traces: result.traces,
         };
