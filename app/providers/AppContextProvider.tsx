@@ -181,6 +181,7 @@ export const AppProvider: React.FC<{
             topics: log.topics,
           }),
         );
+        console.log("logs", logs);
         return {
           // biome-ignore lint/style/noNonNullAssertion: all filtered calls have a name
           call: filteredCalls[i].name!,

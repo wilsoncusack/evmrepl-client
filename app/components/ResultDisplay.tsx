@@ -37,7 +37,15 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
               {log.eventName}
             </span>
             <span className="font-mono text-xs text-yellow-600">
-              ({log.args?.join(", ")})
+              (
+              {Array.isArray(log.args)
+                ? log.args.join(", ")
+                : log.args
+                  ? Object.entries(log.args)
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(", ")
+                  : ""}
+              )
             </span>
           </div>
         ))}
