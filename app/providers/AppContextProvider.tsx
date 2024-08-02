@@ -197,6 +197,16 @@ export const AppProvider: React.FC<{
     }
   }, [currentFile, filesFunctionCalls, currentFileCompilationResult]);
 
+  const addNewContract = useCallback((newFile: SolidityFile) => {
+    setFiles((prevFiles) => [...prevFiles, newFile]);
+    clearCurrentFileFunctionCallResults();
+    setCurrentFileId(newFile.id);
+    setFilesFunctionCalls((prev) => ({
+      ...prev,
+      [newFile.id]: [{ rawInput: "" }],
+    }));
+  }, []);
+
   const debouncedRefreshFunctionCallResult = useDebounce(
     refreshFunctionCallResult,
     300,
@@ -225,6 +235,7 @@ export const AppProvider: React.FC<{
     currentFileCompilationResult,
     currentFileFunctionCallResults,
     clearCurrentFileFunctionCallResults,
+    addNewContract,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

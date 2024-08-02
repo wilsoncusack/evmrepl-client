@@ -42,7 +42,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [noCodeFound, setNoCodeFound] = useState(false);
-  const { setFiles } = useAppContext();
+  const { addNewContract } = useAppContext();
 
   const loadContractsFromSourceify = async (
     chainId: number,
@@ -125,7 +125,7 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
       // First, try to load from Sourcify
       const sourcifyFiles = await loadContractsFromSourceify(chainId, address);
       if (sourcifyFiles.length > 0) {
-        setFiles((prevFiles) => [...prevFiles, ...sourcifyFiles]);
+        sourcifyFiles.forEach((file) => addNewContract(file));
         onClose();
         return;
       }
@@ -150,13 +150,11 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
         bytecode,
       };
 
-      setFiles((prevFiles) => [...prevFiles, newFile]);
+      addNewContract(newFile);
       onClose();
     } catch (error) {
       console.error("Error loading contract:", error);
-      setError(
-        "Failed to load contract. The contract might not be verified, but you can still make calls to it.",
-      );
+      setError("Error loading contract:");
     } finally {
       setIsLoading(false);
     }

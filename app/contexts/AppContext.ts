@@ -22,6 +22,7 @@ interface AppContextType {
   isCompiling: boolean;
   setIsCompiling: React.Dispatch<React.SetStateAction<boolean>>;
   clearCurrentFileFunctionCallResults: () => void;
+  addNewContract: (newFile: SolidityFile) => void;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);

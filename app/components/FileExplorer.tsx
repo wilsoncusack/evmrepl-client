@@ -15,6 +15,7 @@ const FileExplorer: React.FC = () => {
     setCurrentFileId,
     setFiles,
     clearCurrentFileFunctionCallResults,
+    addNewContract,
   } = useAppContext();
   const [editingFileId, setEditingFileId] = useState<string | null>(null);
   const [editingFileName, setEditingFileName] = useState("");
@@ -35,9 +36,9 @@ const FileExplorer: React.FC = () => {
       id: crypto.randomUUID(),
       name: newFileName,
       content: "pragma solidity 0.8.26;\n\n// Your Solidity code here",
-      address: getRandomAddress(), // Add this line
+      address: getRandomAddress(),
     };
-    setFiles([...files, newFile]);
+    addNewContract(newFile);
   };
 
   const deleteFile = (fileId: string) => {
