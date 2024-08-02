@@ -145,12 +145,8 @@ export const AppProvider: React.FC<{
         },
       );
       const results = response.data;
-      console.log("results", results);
-      console.log("calls", calls);
+
       const output: FunctionCallResult[] = results.map((result, i) => {
-        console.log("result", i);
-        console.log(calls[i]);
-        console.log(filteredCalls[i]);
         if (!abi) {
           return {
             call: filteredCalls[i].name || "",
@@ -181,7 +177,7 @@ export const AppProvider: React.FC<{
             topics: log.topics,
           }),
         );
-        console.log("logs", logs);
+
         return {
           // biome-ignore lint/style/noNonNullAssertion: all filtered calls have a name
           call: filteredCalls[i].name!,
