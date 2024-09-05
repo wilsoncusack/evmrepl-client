@@ -7,6 +7,21 @@ import { useAppContext } from "../hooks/useAppContext";
 import type { SolidityFile } from "../types";
 import LoadContractsModal from "./LoadContractsModal";
 import { getRandomAddress } from "../utils";
+import { 
+  ConnectWallet, 
+  Wallet, 
+  WalletDropdown, 
+  WalletDropdownLink, 
+  WalletDropdownDisconnect, 
+} from '@coinbase/onchainkit/wallet'; 
+import {
+  Address,
+  Avatar,
+  Name,
+  Identity,
+  EthBalance,
+} from '@coinbase/onchainkit/identity';
+import { color } from '@coinbase/onchainkit/theme';
 
 const FileExplorer: React.FC = () => {
   const {
@@ -85,6 +100,24 @@ const FileExplorer: React.FC = () => {
 
   return (
     <div className="w-64 bg-gray-800 text-white h-full flex flex-col">
+      <Wallet>
+        <ConnectWallet>
+          <Avatar className="h-6 w-6" />
+          <Name />
+        </ConnectWallet>
+        <WalletDropdown>
+          <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+            <Avatar />
+            <Name />
+            <Address className={color.foregroundMuted} />
+            <EthBalance />
+          </Identity>
+          <WalletDropdownLink icon="wallet" href="https://wallet.coinbase.com">
+            Wallet
+          </WalletDropdownLink>
+          <WalletDropdownDisconnect />
+        </WalletDropdown>
+      </Wallet>
       <div className="p-4 border-b border-gray-700">
         <h3 className="font-bold text-xl">Files</h3>
       </div>

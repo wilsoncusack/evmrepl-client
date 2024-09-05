@@ -1,9 +1,11 @@
 // components/FunctionCallsPanel.tsx
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import FunctionCallItem from "./FunctionCallItem";
+import DeployContract from './DeployContract';
+
 
 const FunctionCallsPanel: React.FC = () => {
   const {
@@ -12,6 +14,7 @@ const FunctionCallsPanel: React.FC = () => {
     setFilesFunctionCalls,
     currentFileFunctionCallResults,
   } = useAppContext();
+  const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
 
   const functionCalls = useMemo(() => {
     if (!currentFile) return [];
@@ -66,6 +69,15 @@ const FunctionCallsPanel: React.FC = () => {
         >
           Add Function Call
         </button>
+        <button
+          onClick={() => setIsDeployModalOpen(true)}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+        >
+          Deploy Contract
+        </button>
+        {isDeployModalOpen && (
+          <DeployContract onClose={() => setIsDeployModalOpen(false)} />
+        )}
       </div>
     </div>
   );
