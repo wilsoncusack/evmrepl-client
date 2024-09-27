@@ -1,28 +1,27 @@
 "use client";
 
+import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  decodeEventLog,
+  decodeFunctionResult,
+  zeroAddress,
+  type Address,
+  type DecodeEventLogReturnType,
+  type Hex,
+} from "viem";
+import { base } from "viem/chains";
 import { AppContext } from "../contexts/AppContext";
+import { useDebounce } from "../hooks/useDebounce";
 import type {
   CompilationResult,
   ExecutionResponse,
   FileFunctionCalls,
   FileId,
-  FunctionCall,
   FunctionCallResult,
   SolidityFile,
 } from "../types";
-import {
-  type Address,
-  type DecodeEventLogReturnType,
-  type Hex,
-  decodeEventLog,
-  decodeFunctionResult,
-  encodeFunctionData,
-  zeroAddress,
-} from "viem";
-import axios from "axios";
-import { useDebounce } from "../hooks/useDebounce";
-import { extractFileName, replacer } from "../utils";
+import { extractFileName } from "../utils";
 
 export const AppProvider: React.FC<{
   initialFiles: SolidityFile[];
@@ -41,6 +40,7 @@ export const AppProvider: React.FC<{
   const [isCompiling, setIsCompiling] = useState(false);
   const [currentFileFunctionCallResults, setCurrentFileFunctionCallResults] =
     useState<FunctionCallResult[] | undefined>(undefined);
+  const [chainId, setChainId] = useState<number>(base.id);
 
   const currentFile = useMemo(() => {
     return files.find((f) => f.id === currentFileId);
