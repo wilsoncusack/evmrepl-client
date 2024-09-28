@@ -7,6 +7,8 @@ import { useAppContext } from "../hooks/useAppContext";
 import type { SolidityFile } from "../types";
 import LoadContractsModal from "./LoadContractsModal";
 import { getRandomAddress } from "../utils";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 const FileExplorer: React.FC = () => {
   const {
@@ -77,6 +79,16 @@ const FileExplorer: React.FC = () => {
     } else if (e.key === "Escape") {
       setEditingFileId(null);
     }
+  };
+
+  const downloadAllFiles = () => {
+    const zip = new JSZip();
+    files.forEach((file) => {
+      zip.file(file.name, file.content);
+    });
+    zip.generateAsync({ type: "blob" }).then((content) => {
+      saveAs(content, "solidity_contracts.zip");
+    });
   };
 
   if (!currentFile) {
@@ -153,6 +165,13 @@ const FileExplorer: React.FC = () => {
           onClick={() => setIsLoadContractsModalOpen(true)}
         >
           Load Contracts
+        </button>
+        <button
+          type="button"
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors"
+          onClick={downloadAllFiles}
+        >
+          Download All Files
         </button>
       </div>
       <LoadContractsModal

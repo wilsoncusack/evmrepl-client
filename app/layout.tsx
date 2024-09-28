@@ -1,9 +1,10 @@
 import "./globals.css";
-import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
+import { randomUUID } from "node:crypto";
+import type { Metadata } from "next";
 import { AppProvider } from "./providers/AppContextProvider";
-import { randomUUID } from "crypto";
-import { FileFunctionCalls } from "./types";
+import { WagmiProvider } from "./providers/WagmiProvider";
+import type { FileFunctionCalls } from "./types";
 import { getRandomAddress } from "./utils";
 
 const simpleStorageSolidityCode = `pragma solidity 0.8.26;
@@ -61,12 +62,14 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <AppProvider
-        initialFiles={initialFiles}
-        initialFunctionCalls={initialFunctionCalls}
-      >
-        <body>{children}</body>
-      </AppProvider>
+      <WagmiProvider>
+        <AppProvider
+          initialFiles={initialFiles}
+          initialFunctionCalls={initialFunctionCalls}
+        >
+          <body>{children}</body>
+        </AppProvider>
+      </WagmiProvider>
       <Analytics />
     </html>
   );

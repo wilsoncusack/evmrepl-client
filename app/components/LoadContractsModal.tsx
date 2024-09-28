@@ -1,47 +1,28 @@
 // components/LoadContractsModal.tsx
 
-import { useState } from "react";
-import { useAppContext } from "../hooks/useAppContext";
 import axios from "axios";
-import { SolidityFile } from "../types";
+import { useState } from "react";
+import type { Address, Hex } from "viem";
+import { base } from "viem/chains";
+import { useAppContext } from "../hooks/useAppContext";
+import type { SolidityFile } from "../types";
 import { fetchBytecodeFromChain } from "../utils";
-import {
-  base,
-  baseSepolia,
-  sepolia,
-  polygon,
-  arbitrum,
-  optimism,
-  zora,
-  mainnet,
-} from "viem/chains";
-import { Address, Chain, Hex } from "viem";
+import { chains } from "../wagmi";
 
 interface LoadContractsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const chains: Chain[] = [
-  mainnet,
-  sepolia,
-  polygon,
-  arbitrum,
-  optimism,
-  zora,
-  base,
-  baseSepolia,
-];
-
 const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
   isOpen,
   onClose,
 }) => {
   const [address, setAddress] = useState<Address | undefined>(undefined);
-  const [chainId, setChainId] = useState<number>(base.id); // Default to Base
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [noCodeFound, setNoCodeFound] = useState(false);
+  const [chainId, setChainId] = useState<number>(base.id); // Default to Base
   const { addNewContract } = useAppContext();
 
   const loadContractsFromSourceify = async (
