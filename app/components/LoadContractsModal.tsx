@@ -22,11 +22,8 @@ const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [noCodeFound, setNoCodeFound] = useState(false);
-  const {
-    addNewContract,
-    contractsChainId: chainId,
-    setChainId,
-  } = useAppContext();
+  const [chainId, setChainId] = useState<number>(base.id); // Default to Base
+  const { addNewContract } = useAppContext();
 
   const loadContractsFromSourceify = async (
     chainId: number,
