@@ -23,6 +23,19 @@ import {
 import axios from "axios";
 import { useDebounce } from "../hooks/useDebounce";
 import { extractFileName, replacer } from "../utils";
+import { WagmiProvider,  createConfig, http } from 'wagmi'
+import {   
+  base,
+  baseSepolia,
+  sepolia,
+  polygon,
+  arbitrum,
+  optimism,
+  zora,
+  mainnet,
+  localhost,
+} from "wagmi/chains";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const AppProvider: React.FC<{
   initialFiles: SolidityFile[];
@@ -210,6 +223,33 @@ export const AppProvider: React.FC<{
     300,
   );
 
+  const config = createConfig({
+    chains: [
+      mainnet,
+      sepolia,
+      polygon,
+      arbitrum,
+      optimism,
+      zora,
+      base,
+      baseSepolia,
+      localhost
+    ],
+    transports: {
+      [mainnet.id]: http(),
+      [sepolia.id]: http(),
+      [polygon.id]: http(),
+      [arbitrum.id]: http(),
+      [optimism.id]: http(),
+      [zora.id]: http(),
+      [base.id]: http(),
+      [baseSepolia.id]: http(),
+      [localhost.id]: http(),
+    },
+  });
+
+  const queryClient = new QueryClient();
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: want to update when any of these change
   useEffect(() => {
     debouncedRefreshFunctionCallResult();
@@ -236,5 +276,11 @@ export const AppProvider: React.FC<{
     addNewContract,
   };
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <AppContext.Provider value={value}>{children}</AppContext.Provider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
 };

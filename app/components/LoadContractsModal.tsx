@@ -14,6 +14,7 @@ import {
   optimism,
   zora,
   mainnet,
+  localhost,
 } from "viem/chains";
 import { Address, Chain, Hex } from "viem";
 
@@ -31,6 +32,7 @@ const chains: Chain[] = [
   zora,
   base,
   baseSepolia,
+  localhost,
 ];
 
 const LoadContractsModal: React.FC<LoadContractsModalProps> = ({
